@@ -51,7 +51,7 @@ const controller = {
 					},
 				});
 				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "sensorKelembapan" : "sensorSuhu", createdSensor);
-				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "listSensorKelembapan" : "listSensorSuhu", listDataMap);
+				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "listSensorKelembapan" : "listSensorSuhu", listData);
 			}
 			await prisma.$disconnect();
 			return message(response, 200, true, "Berhasil menambah data sensor", null);
