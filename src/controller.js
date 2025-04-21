@@ -44,11 +44,11 @@ const controller = {
 			if (io) {
 				const listData = await prisma.sensor.findMany({
 					take: 50,
-					orderBy: { updatedAt: "asc" },
-					select: { type: true, value: true, createdAt: true },
+					orderBy: { updatedAt: "desc" },
 					where: {
 						...(type && { type }),
 					},
+					select: { type: true, value: true, createdAt: true },
 				});
 				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "sensorKelembapan" : "sensorSuhu", createdSensor);
 				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "listSensorKelembapan" : "listSensorSuhu", listData);
@@ -77,15 +77,15 @@ const controller = {
 				const [kelembapan, suhu] = await Promise.all([
 					prisma.sensor.findMany({
 						take: 50,
-						orderBy: { updatedAt: "asc" },
-						select: { type: true, value: true, createdAt: true },
+						orderBy: { updatedAt: "desc" },
 						where: { type: "KELEMBAPAN_TANAH" },
+						select: { type: true, value: true, createdAt: true },
 					}),
 					prisma.sensor.findMany({
 						take: 50,
-						orderBy: { updatedAt: "asc" },
-						select: { type: true, value: true, createdAt: true },
+						orderBy: { updatedAt: "desc" },
 						where: { type: "SUHU_UDARA" },
+						select: { type: true, value: true, createdAt: true },
 					}),
 				]);
 				data = [...kelembapan, ...suhu];
