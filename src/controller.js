@@ -32,7 +32,7 @@ const controller = {
 		}
 	},
 
-	get: async (request, response) => {
+	get: async (request, response,io) => {
 		try {
 			await prisma.$connect();
 			const [dataKelembapan, dataSuhu] = await Promise.all([
