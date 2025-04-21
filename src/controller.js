@@ -88,7 +88,7 @@ const controller = {
 					prisma.sensor.findMany({
 						take: 50,
 						orderBy: { updatedAt: "desc" },
-						where: { type: "PH_AIR" },
+						where: { type: "SUHU_UDARA" },
 						select: {
 							type: true,
 							value: true,
@@ -98,7 +98,7 @@ const controller = {
 					prisma.sensor.findMany({
 						take: 50,
 						orderBy: { updatedAt: "desc" },
-						where: { type: "KEKERUHAN" },
+						where: { type: "KELEMBAPAN_TANAH" },
 						select: {
 							type: true,
 							value: true,
@@ -113,7 +113,7 @@ const controller = {
 				}
 			}
 			await prisma.$disconnect();
-			return message(response, 200, true, "Berhasil menambah data sensor", null);
+			return message(response, 201, true, "Berhasil menambah data sensor", null);
 		} catch (error) {
 			await prisma.$disconnect();
 			return message(response, 500, false, error.message, null);
