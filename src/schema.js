@@ -5,14 +5,11 @@ const schema = {
 		username: z.string({ required_error: "Username harus diisi" }).min(1, { message: "Username harus diisi" }),
 		password: z.string({ required_error: "Password harus diisi" }).min(1, { message: "Password harus diisi" }),
 	}),
-	sensorTambah: z.object({
+	add: z.object({
 		type: z.enum(["KELEMBAPAN_TANAH", "SUHU_UDARA"], {
 			required_error: "Type harus diisi",
 		}),
 		value: z.number({ required_error: "Value harus berupa angka" }).positive(),
-	}),
-	sensor: z.object({
-		type: z.enum(["KELEMBAPAN_TANAH", "SUHU_UDARA"]).optional(),
 	}),
 };
 

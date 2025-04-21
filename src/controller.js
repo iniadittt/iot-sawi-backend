@@ -31,66 +31,89 @@ const controller = {
 			return message(response, 500, false, error.message, null);
 		}
 	},
-	sensorTambah: async (request, response, io) => {
+
+	get: async (request, response) => {
+		try {
+			await prisma.$connect();
+			const [dataKelembapan, dataSuhu] = await Promise.all([
+				prisma.sensor.findMany({
+					take: 50,
+					orderBy: { updatedAt: "desc" },
+					where: { type: "KELEMBAPAN_TANAH" },
+					select: {
+						type: true,
+						value: true,
+						createdAt: true,
+					},
+				}),
+				prisma.sensor.findMany({
+					take: 50,
+					orderBy: { updatedAt: "desc" },
+					where: { type: "SUHU_UDARA" },
+					select: {
+						type: true,
+						value: true,
+						createdAt: true,
+					},
+				}),
+			]);
+			await prisma.$disconnect();
+			const data = [...dataKelembapan, ...dataSuhu];
+			const responseMap = !data.length ? [] : data;
+			if (io) {
+				io.emit("getDataSensor", responseMap);
+			}
+			return message(response, 200, true, "Berhasil mengambil data sensor", responseMap);
+		} catch (error) {
+			await prisma.$disconnect();
+			return message(response, 500, false, error.message, null);
+		}
+	},
+
+	add: async (request, response, io) => {
 		try {
 			const validation = schema.sensorTambah.safeParse(request.body);
 			if (!validation.success) return message(response, 200, false, "Gagal validasi request", validation.error.format());
 			const { type, value } = validation.data;
 			await prisma.$connect();
 			const createdSensor = await prisma.sensor.create({
-				data: { type, value },
+				data: {
+					type,
+					value,
+				},
 			});
 			if (!createdSensor) return message(response, 200, true, "Gagal menambah data sensor", null);
 			if (io) {
-				const listData = await prisma.sensor.findMany({
-					take: 50,
-					orderBy: { updatedAt: "desc" },
-					where: {
-						...(type && { type }),
-					},
-					select: { type: true, value: true, createdAt: true },
-				});
-				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "sensorKelembapan" : "sensorSuhu", createdSensor);
-				io.emit(createdSensor.type === "KELEMBAPAN_TANAH" ? "listSensorKelembapan" : "listSensorSuhu", listData);
+				const [dataPh, dataKekeruhan] = await Promise.all([
+					prisma.sensor.findMany({
+						take: 50,
+						orderBy: { updatedAt: "desc" },
+						where: { type: "PH_AIR" },
+						select: {
+							type: true,
+							value: true,
+							createdAt: true,
+						},
+					}),
+					prisma.sensor.findMany({
+						take: 50,
+						orderBy: { updatedAt: "desc" },
+						where: { type: "KEKERUHAN" },
+						select: {
+							type: true,
+							value: true,
+							createdAt: true,
+						},
+					}),
+				]);
+				const data = [...dataPh, ...dataKekeruhan];
+				const responseMap = !data.length ? [] : data;
+				if (io) {
+					io.emit("getDataSensor", responseMap);
+				}
 			}
 			await prisma.$disconnect();
 			return message(response, 200, true, "Berhasil menambah data sensor", null);
-		} catch (error) {
-			await prisma.$disconnect();
-			return message(response, 500, false, error.message, null);
-		}
-	},
-	sensor: async (request, response) => {
-		try {
-			const validation = schema.sensor.safeParse(request.body);
-			if (!validation.success) return message(response, 200, false, "Gagal validasi request", validation.error.format());
-			const { type } = validation.data;
-			let data = [];
-			if (type) {
-				data = await prisma.sensor.findMany({
-					take: 50,
-					orderBy: { updatedAt: "asc" },
-					select: { type: true, value: true, createdAt: true },
-					where: { type },
-				});
-			} else {
-				const [kelembapan, suhu] = await Promise.all([
-					prisma.sensor.findMany({
-						take: 50,
-						orderBy: { updatedAt: "desc" },
-						where: { type: "KELEMBAPAN_TANAH" },
-						select: { type: true, value: true, createdAt: true },
-					}),
-					prisma.sensor.findMany({
-						take: 50,
-						orderBy: { updatedAt: "desc" },
-						where: { type: "SUHU_UDARA" },
-						select: { type: true, value: true, createdAt: true },
-					}),
-				]);
-				data = [...kelembapan, ...suhu];
-			}
-			return message(response, 200, true, "Berhasil mengambil data sensor", !data.length ? [] : data);
 		} catch (error) {
 			await prisma.$disconnect();
 			return message(response, 500, false, error.message, null);
