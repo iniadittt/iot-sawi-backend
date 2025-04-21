@@ -32,7 +32,7 @@ const controller = {
 		}
 	},
 
-	get: async (request, response,io) => {
+	get: async (request, response, io) => {
 		try {
 			await prisma.$connect();
 			const [dataKelembapan, dataSuhu] = await Promise.all([
@@ -72,7 +72,7 @@ const controller = {
 
 	add: async (request, response, io) => {
 		try {
-			const validation = schema.sensorTambah.safeParse(request.body);
+			const validation = schema.add.safeParse(request.body);
 			if (!validation.success) return message(response, 200, false, "Gagal validasi request", validation.error.format());
 			const { type, value } = validation.data;
 			await prisma.$connect();
